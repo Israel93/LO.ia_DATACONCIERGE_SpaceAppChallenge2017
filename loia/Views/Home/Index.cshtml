@@ -1,0 +1,105 @@
+﻿<div class="row contenidocuadro" >
+    <div class="col-md-4">
+        <h1>Conversemos!</h1>
+        <h6>Soy tu compañero de investigación!</h6>
+        <div class="row" >
+            <div class="col-md-12">
+                <iframe height="400" src='https://webchat.botframework.com/embed/botPruebaS?s=PzpGyJ84IaU.cwA.2SI.KHrj9aI86NhYviSZOJXc6kV61Bvozsw6zBHLgZLII5Y'></iframe>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8" >
+        <div class="row">
+            <div class="col-md-4">
+                <h2>Analizar Imagen</h2>
+            </div>
+            <div class="col-md-8">
+                <br/>
+                <form action="/home/AnalizarImagen" class="form-inline" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="file" class="form-control" name="photo" id="photo" />
+                       
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Analizar" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+        <hr />
+        <div style="max-height:450px; overflow: scroll;">
+            <center>
+                @if (ViewBag.imagen != "")
+            {
+                    <img src="@ViewBag.imagen" height="250" width="250" />
+                }
+                <br />
+                <label for="txtCategoria">EVENTO: <input type="text" style="color:#000000;" value="@ViewBag.Categoria" id="txtCategoria" /> </label>
+            </center>
+
+            <hr />
+            <div id="Resultados">
+
+            </div>
+        </div>
+       
+    </div>
+    
+</div>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7Ol2onPKOBI3qIHPYcp8GWViFWa1kWmA">
+</script>
+<script>
+    $(document).ready(function () {
+        var categoria = $('#txtCategoria').val();
+        if (categoria!="") {
+            $.ajax({
+                url: "https://eonet.sci.gsfc.nasa.gov/api/v2.1/events",
+                method: "GET",
+                success: function (respuesta) {
+
+                    $(respuesta.events).each(function () {
+                        if (this.categories[0].title == categoria) {
+                            console.log(this.geometries[0].coordinates[0]);
+                            var longitud = this.geometries[0].coordinates[0];
+                            var latitud = this.geometries[0].coordinates[1];
+                           // var latitud = -110.84084;
+                           // var longitud = 31.78758;
+                            $('#Resultados').append("<p>Lugar: " + this.title + "  | Fecha: " + this.geometries[0].date + " </p>");
+                            $('#Resultados').append("<div id='" + this.id + "' style='height: 200px; width: 100%'> </div>");
+                            initMap(latitud, longitud, this.id);
+                        }
+                    });
+
+                },
+                beforeSend: function () {
+
+                },
+                complete: function () {
+
+                },
+                error: function () {
+                    alert('Problemas en la consulta!');
+                }
+            });
+        }
+    });
+
+    function initMap(latitud, longitud, control) {
+        var uluru = { lat: latitud, lng: longitud };
+        var map = new google.maps.Map(document.getElementById(control), {
+            zoom: 4,
+            center: uluru
+        });
+        var marker = new google.maps.Marker({
+            position: uluru,
+            map: map
+        });
+    }
+
+</script>
+<style>
+    .wc-header {
+    background-color: #000000 !important;
+    }
+</style>
